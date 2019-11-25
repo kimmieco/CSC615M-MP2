@@ -81,5 +81,6 @@ def onewayonestack(input):
 			######################GENERATE DENNING NOTATION for ∈ HERE
 			pass
 #input = "L={ak bm dk|k>=1,m>2}"
-input = "L={ax by cz by|x>=1,y>=1,z>=1}"
+# input = "L={ax by cz by|x>=1,y>=1,z>=1}"
+input = "L={w c wR c w|wE(a∪b)*}"
 onewayonestack(input)
