@@ -206,13 +206,91 @@ def two_way_one_stack(input):
         elements = string[0].split(" ")
         condition = string[1].split("E")[1]
         condition = condition[1:-2].split("∪")
+        elements.insert(0, '#')
+        elements.append('#')
+        state_number = 2
 
         print(elements)
         print(condition)
+
+        result.append("1] scanR(#, 2)")
+        for i in range(3, len(elements), 2):
+            if elements[i-2] == elements[i]:
+                if i == 3:
+                    result.append(str(state_number) + "] scanR")
+                    state_number = scanR_ignore(state_number, condition, elements[i-1])
+                state_number = w_w(state_number, condition, elements[i-3], elements[i-1], elements[i+1])
+            else:
+                if i != 3:
+                    result.append(str(state_number) + "] scanL")
+                    state_number = scanL_ignore(state_number, condition, elements[i-3])
+                state_number = w_wR(state_number, condition, elements[i-1], elements[i+1])
+
+        result.append(str(state_number) + "] HALT")
+        
+        for i in result:
+            print(i)
+
+def scanL_w(scan_state, condition, stopper):
+    #  something
+    for i in range(len(condition)):
+        result[scan_state-1] = result[scan_state-1] + "( " + str(condition[i]) + ", " + str(scan_state + 1 + i) + " )"
+        result.append(str(scan_state + 1 + i) + "] write( " + condition[i] + ", " + str(scan_state) + " )")
+    result[scan_state-1] = result[scan_state-1] + "( " + stopper + ", " + str(scan_state + len(condition) + 1) + " )"
+    
+    return scan_state + len(condition) + 1
+
+def scanL_ignore(scan_state, condition, stopper):
+    for i in range(len(condition)):
+        result[scan_state-1] = result[scan_state-1] + "( " + condition[i] + ", " + str(scan_state) + " )"
+    result[scan_state-1] = result[scan_state-1] + "( " + stopper + ", " + str(scan_state + 1) + " )"
+    
+    return scan_state + 1
+
+def scanR_r(scan_state, condition, stopper):
+    for i in range(len(condition)):
+        result[scan_state-1] = result[scan_state-1] + "( " + condition[i] + ", " + str(scan_state + 1 + i) + " ) "
+        result.append(str(scan_state + 1 + i) + "] read( " + condition[i] + ", " + str(scan_state) + " )")
+    result[scan_state-1] = result[scan_state-1] + "( " + stopper + ", " + str(scan_state + len(condition) + 1) + " )"
+    
+    return scan_state + len(condition) + 1
+
+def scanR_ignore(scan_state, condition, stopper):
+    for i in range(len(condition)):
+        result[scan_state-1] = result[scan_state-1] + "( " + condition[i] + ", " + str(scan_state) + " )"
+    result[scan_state-1] = result[scan_state-1] + "( " + stopper + ", " + str(scan_state + 1) + " )"
+    
+    return scan_state + 1
+
+def scanR_w(scan_state, condition, stopper):
+    for i in range(len(condition)):
+        result[scan_state-1] = result[scan_state-1] + "( " + condition[i] + ", " + str(scan_state + 1 + i) + " ) "
+        result.append(str(scan_state + 1 + i) + "] write( " + condition[i] + ", " + str(scan_state) + " )")
+    result[scan_state-1] = result[scan_state-1] + "( " + stopper + ", " + str(scan_state + len(condition) + 1) + " )"
+    
+    return scan_state + len(condition) + 1
+
+def w_w(state_number, condition, stopper1, stopper2, stopper3):
+    result.append(str(state_number) + "] scanL")
+    state_number = scanL_w(state_number, condition, stopper1)
+    result.append(str(state_number) + "] scanR")
+    state_number = scanR_ignore(state_number, condition, stopper2)
+    result.append(str(state_number) + "] scanR")
+    state_number = scanR_r(state_number, condition, stopper3)
+
+    return state_number
+
+def w_wR(state_number, condition, stopper1, stopper2):
+    result.append(str(state_number) + "] scanR")
+    state_number = scanR_w(state_number, condition, stopper1)
+    result.append(str(state_number) + "] scanR")
+    state_number = scanR_r(state_number, condition, stopper2)
+
+    return state_number
         
 # input = "L={w c wR c w|wE(a∪b∪c∪d)*}"
 # input = "L={ax bx p d cx|x>=1}"
 # input = "L={an bm cm dn|n>=1,m>=1}"
-input = "L={w e w|wE(a∪b)*}"
+input = "L={wR c wR c wR|wE(a∪b)*}"
 
 two_way_one_stack(input)
