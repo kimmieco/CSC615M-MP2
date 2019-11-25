@@ -1,3 +1,6 @@
+
+import one_way_two_stack
+
 #input = "L={ak bm dk|k>=1,m>2}"
 input = "L={ax by cz by|x>=1,y>=1,z>=1}"
 
@@ -82,3 +85,5 @@ else:
 	else:
 		######################GENERATE DENNING NOTATION for ∈ HERE
 		pass
+
+	print(input_alphabet)
