@@ -1,8 +1,9 @@
 
-import one_way_two_stack
+import one_way_two_stack as owts
 
 #input = "L={ak bm dk|k>=1,m>2}"
-input = "L={ax by cz by|x>=1,y>=1,z>=1}"
+#input = "L={ak bk ck bk|k>=1}"
+input = "L={ak|k>=1}"
 
 input = input[3:-1]
 
@@ -27,7 +28,7 @@ if input.find("∈") == -1:
 		if len(element) == 1:
 			inputdict = {"superscript":"1", "element":element[0]} #one character
 			input_alphabet.append(inputdict)
-	print(input_alphabet)
+	#print(input_alphabet)
 
 	result = []
 	
@@ -86,4 +87,6 @@ else:
 		######################GENERATE DENNING NOTATION for ∈ HERE
 		pass
 
-	print(input_alphabet)
+#print(input_alphabet)
+
+owts.generate_program(input_alphabet)
