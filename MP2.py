@@ -225,7 +225,7 @@ def onewayonestack(input):
 			result.append("Sorry! Can't be solved using 1 way 1 stack")
 		else:
 			######################GENERATE DENNING NOTATION for ∈ HERE
-			
+
 			result.append("1]scan(#,1)(#,2)")
 			if input.find("R") != -1:  #case reverse
 				prev = None
@@ -297,3 +297,4 @@ input = "L={0n 1m|n>=2,m>=4}"
 
 input = input[3:-1]
 print(onewayonestack(input))
+
