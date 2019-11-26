@@ -96,7 +96,7 @@ def two_way_one_stack(input):
             if len(element) == 1:
                 inputdict = {"superscript":"1", "element":element[0],  "condition": "==1", "place":place} #one character
                 input_alphabet.append(inputdict)
-        print(input_alphabet) # TODO: remove this after testing
+        # print(input_alphabet) # TODO: remove this after testing
 
         state_number = 2
 
@@ -107,6 +107,10 @@ def two_way_one_stack(input):
                 if input_alphabet[current]['condition'] == "==1":
                     result.append(str(state_number) + "] scanR( " +input_alphabet[current]['element'] + ", " + str(state_number + 1) + " )")
                     state_number += 1
+
+                elif input_alphabet[current]['condition'] == "==0":
+                    result = result[:-1]
+                    state_number -= 1
 
                 else:
                     state_number = minimum_required(input_alphabet[current], state_number)
@@ -179,7 +183,6 @@ def two_way_one_stack(input):
         while "scan" not in result[last]:
             last -= 1
         if " #, " not in result[last]:
-            print(last)
             if last < -2:
                 result[last] = result[last] + " ( #, " + str(state_number - 1) + " )"
             else:
@@ -210,9 +213,6 @@ def two_way_one_stack(input):
         elements.append('#')
         state_number = 2
 
-        print(elements)
-        print(condition)
-
         result.append("1] scanR(#, 2)")
         for i in range(3, len(elements), 2):
             if elements[i-2] == elements[i]:
@@ -228,6 +228,7 @@ def two_way_one_stack(input):
 
         result.append(str(state_number) + "] HALT")
         
+        print(input)
         for i in result:
             print(i)
 
@@ -291,6 +292,6 @@ def w_wR(state_number, condition, stopper1, stopper2):
 # input = "L={w c wR c w|wE(a∪b∪c∪d)*}"
 # input = "L={ax bx p d cx|x>=1}"
 # input = "L={an bm cm dn|n>=1,m>=1}"
-input = "L={wR c wR c wR|wE(a∪b)*}"
+input = "L={ax by cz dy|x>=1,y>=1,z>=1}"
 
 two_way_one_stack(input)
