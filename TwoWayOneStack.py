@@ -212,28 +212,60 @@ def two_way_one_stack(input):
         elements.insert(0, '#')
         elements.append('#')
         state_number = 2
+        index = []
+
+        for i in range (1, len(elements)):
+            if 'w' in elements[i]:
+                index.append(i)
 
         result.append("1] scanR(#, 2)")
-        for i in range(3, len(elements), 2):
-            if elements[i-2] == elements[i]:
-                if i == 3:
-                    result.append(str(state_number) + "] scanR")
-                    state_number = scanR_ignore(state_number, condition, elements[i-1])
-                state_number = w_w(state_number, condition, elements[i-3], elements[i-1], elements[i+1])
+        for i in range(1, len(elements)):
+            if 'w' not in elements[i]:
+                result.append(str(state_number) + "] scanR( " + elements[i] + ", " + str(state_number + 1) + " ) ")
+                state_number += 1
             else:
-                if i != 3:
-                    result.append(str(state_number) + "] scanL")
-                    state_number = scanL_ignore(state_number, condition, elements[i-3])
-                state_number = w_wR(state_number, condition, elements[i-1], elements[i+1])
+                break
 
+        for i in range(1, len(index), 2):
+            if elements[index[i-1]] == elements[index[i]]:
+                if i == 1:
+                    result.append(str(state_number) + "] scanR")
+                    state_number = scanR_ignore(state_number, condition, elements[index[i]-1])
+                state_number = w_w(state_number, condition, elements[index[i-1]-1], elements[index[i]-1], elements[index[i]+1])
+            else:
+                if i != 1:
+                    result.append(str(state_number) + "] scanL")
+                    state_number = scanL_ignore(state_number, condition, elements[index[i-1]-1])
+                state_number = w_wR(state_number, condition, elements[index[i]-1], elements[index[i]+1])
+
+        for i in range(index[-1]+1, len(elements)-1):
+            if 'w' not in elements[i]:
+                result.append(str(state_number) + "] scanR( " + elements[i] + ", " + str(state_number + 1) + " ) ")
+                state_number += 1
+            else:
+                break
+
+        if not scanL:
+            result.append(str(state_number) + "] scanL")
+            for i in elements:
+                if 'w' not in i and "( " + i + ", " + str(state_number) + " ) " not in result[-1] and i != '#':
+                    result[-1] = result[-1] + "( " + i + ", " + str(state_number) + " ) "
+            for i in condition:
+                result[-1] = result[-1] + "( " + i + ", " + str(state_number) + " ) "
+            result[-1] = result[-1] + "( #, " + str(state_number + 1) + " ) "
+            state_number += 1
         result.append(str(state_number) + "] HALT")
         
         print(input)
         for i in result:
             print(i)
+        print(elements)
+        print(condition)
 
 def scanL_w(scan_state, condition, stopper):
-    #  something
+    global scanL
+    scanL = True
+
     for i in range(len(condition)):
         result[scan_state-1] = result[scan_state-1] + "( " + str(condition[i]) + ", " + str(scan_state + 1 + i) + " )"
         result.append(str(scan_state + 1 + i) + "] write( " + condition[i] + ", " + str(scan_state) + " )")
@@ -242,6 +274,9 @@ def scanL_w(scan_state, condition, stopper):
     return scan_state + len(condition) + 1
 
 def scanL_ignore(scan_state, condition, stopper):
+    global scanL
+    scanL = True
+
     for i in range(len(condition)):
         result[scan_state-1] = result[scan_state-1] + "( " + condition[i] + ", " + str(scan_state) + " )"
     result[scan_state-1] = result[scan_state-1] + "( " + stopper + ", " + str(scan_state + 1) + " )"
@@ -289,9 +324,9 @@ def w_wR(state_number, condition, stopper1, stopper2):
 
     return state_number
         
-# input = "L={w c wR c w|wE(a∪b∪c∪d)*}"
+input = "L={c c w c wR c c|wE(a∪b)*}"
 # input = "L={ax bx p d cx|x>=1}"
 # input = "L={an bm cm dn|n>=1,m>=1}"
-input = "L={ax by cz dy|x>=1,y>=1,z>=1}"
+# input = "L={ax by cz dy|x>=1,y>=1,z>=1}"
 
 two_way_one_stack(input)
