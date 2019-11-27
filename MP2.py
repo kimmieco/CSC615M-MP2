@@ -33,6 +33,9 @@ def onewayonestack(input):
 			third = input_alphabet[2]
 			if first["superscript"] == second["superscript"] and second["superscript"] == third["superscript"]:
 				error = True
+			for cond in conditions:
+				if int(cond[-1]) != 1:
+					error = True 
 		if elemcount >= 4:
 			i = 0
 			while i < len(input_alphabet) and i+2 != len(input_alphabet):
@@ -46,11 +49,55 @@ def onewayonestack(input):
 				if first["superscript"] != second["superscript"] and second["superscript"] != third["superscript"]:
 					error = False
 				i+=1
+			for cond in conditions:
+				if int(cond[-1]) != 1:
+					error = True 
 		if error == True:
 			result.append("Sorry! Can't be solved using 1 way 1 stack")
 		else:
 			######################GENERATE DENNING NOTATION for >= HERE
-			if elemcount == 2:
+			if elemcount == 1:
+				state = 1
+				result.append("1]scan(#,1)(#,2)")
+				state+= 1
+				prev = None
+				for elem in input_alphabet:
+					if elem['superscript'] != "1":
+						for i in range(0, int(elem['condition'][-1])):
+							result.append(str(state)+"]scan("+elem['element']+","+str(state+1)+")")
+							state+=1
+
+						result.append(str(state)+"]scan("+elem['element']+","+str(state)+")")
+						if elem['place'] == len(input_alphabet):
+							result[state-1]+="(#,"+str(state+1)+")"
+							state+=1
+							result.append(str(state)+"]write(#,"+str(state+1)+")")
+							state +=1
+							result.append(str(state)+"]read(#,"+str(state+1)+")")
+							state +=1
+							result.append(str(state)+"]Halt")
+					else:
+						if prev != None:
+							
+							if prev['superscript'] != "1":
+								result[state-1] = result[state-1] + "("+elem['element']+","+str(state+1)+")"
+							else:
+								result.append(str(state)+"]scan("+elem['element']+","+str(state+1)+")")
+							state+=1
+							if elem['place'] == len(input_alphabet):
+								result.append(str(state)+"]write(#,"+str(state+1)+")")
+								state +=1
+								result.append(str(state)+"]read(#,"+str(state+1)+")")
+								state +=1
+								result.append(str(state)+"]Halt")
+
+						else:
+							result.append(str(state)+"]scan("+elem['element']+","+str(state+1)+")")
+							state+=1
+
+					prev = elem
+
+			elif elemcount == 2:
 				elem1 = None
 				elem2 = None
 				for elem in input_alphabet:
@@ -116,7 +163,7 @@ def onewayonestack(input):
 								else:
 									result.append(str(int(result[-1][0])+1)+"]scan(#,"+str(int(result[-1][0])+2)+")")
 								result.append(str(int(result[-1][0])+1)+"]Halt")
-				else:
+				else: #n,m 2 elem
 					state = 1
 					criticalscan = None
 					result.append("1]scan(#,1)(#,2)")
@@ -177,7 +224,157 @@ def onewayonestack(input):
 								
 								pass
 						prev = elem
-					pass #n,m
+					
+			else: #more than 2 
+				if elemcount == len(conditions):
+					state = 1
+					result.append("1]scan(#,1)(#,2)")
+					state+= 1
+					criticalscan = None
+					prev = None
+					for elem in input_alphabet:
+						if prev != None:
+							result[-1]+="("+elem['element']+","+ str(state)+")"
+							for i in range(0, len(elem['condition'][-1])):
+								result.append(str(state)+"]scan("+elem["element"]+","+str(state+1)+")")
+								state+=1
+						else:
+
+							for i in range(0, len(elem['condition'][-1])):
+								result.append(str(state)+"]scan("+elem["element"]+","+str(state+1)+")")
+								state+=1
+
+						result.append(str(state)+"]scan("+elem["element"]+","+str(state)+")")
+						state+=1
+						
+						if elem['place'] == len(input_alphabet):
+							result[-1]+="(#,"+str(state+1)+")"
+							state+=1
+							result.append(str(state)+"]write(#,"+str(state+1)+")")
+							state +=1
+							result.append(str(state)+"]read(#,"+str(state+1)+")")
+							state +=1
+							result.append(str(state)+"]Halt")
+						prev = elem
+				if elemcount == 3:
+					first =  input_alphabet[0]
+					second = input_alphabet[1]
+					third = input_alphabet[2]
+					stacksuperscript = None
+					save = False
+					state = 1
+					result.append("1]scan(#,1)(#,2)")
+					state+= 1
+					criticalscan = None
+					if first['superscript'] == second['superscript']:
+						stacksuperscript = first['superscript']
+						for elem in input_alphabet:
+							if elem['superscript'] == stacksuperscript:
+								if save == False:
+									save = True
+									criticalscan = state
+									result.append(str(state)+"]scan("+elem["element"]+","+str(state+1)+")")
+									state+=1
+									result.append(str(state)+"]write("+elem["element"]+","+str(criticalscan)+")")
+									state+=1
+									result.append(str(state)+"]read("+elem["element"]+","+str(criticalscan)+")")
+									state+=1
+
+								else:
+									result[criticalscan-1]+= "("+elem['element']+","+ str(state-1)+")"
+							else:
+								result[criticalscan-1]+= "("+elem['element']+","+ str(criticalscan)+")"
+								result[criticalscan-1]+= "(#,"+ str(state)+")"
+								result.append(str(state)+"]Halt")
+
+
+					elif first['superscript'] == third['superscript'] :
+						stacksuperscript = first['superscript']
+						for elem in input_alphabet:
+							if elem['superscript'] == stacksuperscript:
+								if save == False:
+									save = True
+									criticalscan = state
+									result.append(str(state)+"]scan("+elem["element"]+","+str(state+1)+")")
+									state+=1
+									result.append(str(state)+"]write("+elem["element"]+","+str(criticalscan)+")")
+									state+=1
+									result.append(str(state)+"]read("+elem["element"]+","+str(criticalscan)+")")
+									state+=1
+
+								else:
+									result[criticalscan-1]+= "("+elem['element']+","+ str(state-1)+")"
+									result[criticalscan-1]+= "(#,"+ str(state)+")"
+									result.append(str(state)+"]Halt")
+							else:
+								result[criticalscan-1]+= "("+elem['element']+","+ str(criticalscan)+")"
+								
+					else : #second['superscript'] == third
+						stacksuperscript = second['superscript']
+						for elem in input_alphabet:
+							if elem['superscript'] == stacksuperscript:
+								if save == False:
+									save = True									
+									result[criticalscan-1]+= "("+elem['element']+","+ str(state)+")"
+									result.append(str(state)+"]write("+elem["element"]+","+str(criticalscan)+")")
+									state+=1
+									result.append(str(state)+"]read("+elem["element"]+","+str(criticalscan)+")")
+									state+=1
+
+								else:
+									result[criticalscan-1]+= "("+elem['element']+","+ str(state-1)+")"
+									result[criticalscan-1]+= "(#,"+ str(state)+")"
+									result.append(str(state)+"]Halt")
+							else:
+								criticalscan = state
+								result.append(str(state)+"]scan("+elem["element"]+","+str(criticalscan)+")")
+								state+=1
+								print(result)
+				if elemcount == 4:
+					first = input_alphabet[0]
+					second = input_alphabet[1]
+					third = input_alphabet[2]
+					fourth = input_alphabet[3]
+					state = 1
+					result.append("1]scan(#,1)(#,2)")
+					state+= 1
+					criticalscan = None
+					if first['superscript'] == fourth['superscript'] and second['superscript'] == third['superscript']:
+						for elem in input_alphabet:
+
+							if elem != third and elem != fourth:
+								
+								if criticalscan == None:
+									criticalscan = state
+									result.append(str(state)+"]scan("+elem['element']+","+str(state+1)+")")
+									state+=1
+									result.append(str(state)+"]write("+elem['element']+","+str(criticalscan)+")")
+									state+=1
+								else:
+									result[criticalscan-1]+="("+elem['element']+","+str(state)+")"
+									result.append(str(state)+"]write("+elem['element']+","+str(criticalscan)+")")
+									state+=1
+							elif elem == third:
+								result[criticalscan-1]+="("+elem['element']+","+str(state)+")"
+								result.append(str(state)+"]read("+second['element']+","+str(criticalscan)+")")
+								state+=1
+							else:
+								result[criticalscan-1]+="("+elem['element']+","+str(state)+")"
+								result.append(str(state)+"]read("+first['element']+","+str(criticalscan)+")")
+								state+=1
+							if elem['place'] == len(input_alphabet):
+								result[criticalscan-1]+= "(#,"+ str(state)+")"
+								result.append(str(state)+"]Halt")
+
+					
+				else:
+					result.append("Sorry! Can't be solved using 1 way 1 stack")
+
+
+
+
+
+				
 						
 	#######element checker for ∈
 	else: 
@@ -213,14 +410,16 @@ def onewayonestack(input):
 		if elemcount > 3:
 			error = True
 		else:
-			if input.find("R") == -1 and len(alphanumeric):
+
+			if input.find("R") != -1 and len(alphanumeric):
 				error = True
 			i = 0
 			while i < len(elements) and i+1 != len(elements):
 				if elements[i][0] == 'w' and elements[i+1][0] == 'w' :
 					error = True
 				i+=1
-
+			if len(alphanumeric) == 1:
+				error = False
 		if error == True:
 			result.append("Sorry! Can't be solved using 1 way 1 stack")
 		else:
@@ -283,17 +482,55 @@ def onewayonestack(input):
 						result.append(str(int(result[-1][0])+1)+"]Halt")
 					prev = elem
 			else:# case no reverse
-				pass
+				print("DED")
+				prev = None
+				criticalscan = None
+				state = 2
+				for elem in input_alphabet:
+					if elem['superscript'] != "1":
+						if criticalscan == None:
+							result.append(str(state)+"]scan")
+							criticalscan = state
+							for alpha in alphanumeric:
+								result[criticalscan-1] += "("+alpha+","+str(state+1)+")"
+								result.append(str(state+1)+"]write("+alpha+","+str(criticalscan)+")")
+								state+=1 
+						else:
+							result.append(str(state)+"]scan")
+							criticalscan = state
+							result[criticalscan-1] += "("+alphanumeric[0]+","+str(state+1)+")"
+							result.append(str(state+1)+"]read("+alphanumeric[1]+","+str(criticalscan)+")")
+							state+=1 
+							result[criticalscan-1] += "("+alphanumeric[1]+","+str(state+1)+")"
+							result.append(str(state+1)+"]read("+alphanumeric[0]+","+str(criticalscan)+")")
+							state+=1 
+							if elem['place'] == len(input_alphabet):
+								result.append(str(state+1)+"]scan(#,"+str(state+1)+")")
+								state+=1
+								result.append(str(state+1)+"]Halt")
+								state+=1
 
+
+					else:
+						if prev['superscript'] != "1":
+							result[criticalscan-1] += "("+elem['element']+","+str(state+1)+")"
+							state+=1
+						else:
+							result.append(result[-1][0]+"]scan("+elem['element']+","+str(state+1)+")")
+							state+=1
+						
+				
+					prev = elem
 			
 	return result
 #input = "L={ak bk|k>=1}"
-input = "L={0n 1m|n>=2,m>=4}"
+#input = "L={0n 1m|n>=1,m>=1}"
 #input = "L={ak c c bk|k>=1}"
 #input = "L={c c ak bk|k>=1}"
-#input = "L={ax by cz by|x>=1,y>=1,z>=1}"
+#input = "L={ax by cz bc|x>=2,y>=4,z>=3,c>=3}"
 #input = "L={w e wR|wE(aUbUcUd)*}"
-#input = "L={w c wR|wE(aUb)*}"
-
+#input = "L={c c ak c c|k>=3}"
+#input = "L={w e w|wE(aUb)*}"
+input = "L={an bm cm dn|n>=1,m>=1}"
 input = input[3:-1]
-print(onewayonestack(input))
+print(onewayonestack(input))	
