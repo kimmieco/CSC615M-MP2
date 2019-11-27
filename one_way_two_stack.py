@@ -5,7 +5,7 @@ w1 = "write 1"
 r1 = "read 1"
 h = "halt"
 w2 = "write 2"
-r1 = "read 2"
+r2 = "read 2"
 
 
 class State:
@@ -92,11 +92,12 @@ def generate_program(input_alphabet):
 
   #Add first step
   state = make_step(curr_state,s,None,None)
+  curr_state+=1
   state.add_transition('#', state)
-  next_state = State(curr_state+1,s)
+  next_state = State(curr_state,s)
+  curr_state+=1
   state.add_transition('#', next_state)
   program.append(state)
-  curr_state+=1
 
   
   #Iterate through every token in the language
@@ -111,11 +112,11 @@ def generate_program(input_alphabet):
     lss_num = latest_scan_state.number
 
     for j in range(0,superscript_amt):
-      program.append(make_step(curr_state,s,elem,State(curr_state+1,s)))
+      program.append(make_step(curr_state,s,elem,State(curr_state,s)))
       curr_state +=1
 
     if(i > 0): #If the element is not the first
-      print("not first element")
+      #print("not first element")
 
       if(not first_stack.is_empty):
         #If the superscript of the element pushed into the stack is the same as the current superscript
@@ -134,88 +135,64 @@ def generate_program(input_alphabet):
             #Read 1 state goes to Write 2 state
             r.add_transition(first_stack.symbol,w)
             #Make Scan state
-            s = make_step(curr_state+1,s,None,None)
-            program.append(s)
+            sc = make_step(curr_state+1,s,None,None)
+            program.append(sc)
             curr_state+=1
             #Write 2 state goes to new Scan state
-            w.add_transition(elem,s)
+            w.add_transition(elem,sc)
             #Scan state goes back to Read 1 state
-            s.add_transition(elem,r)
+            sc.add_transition(elem,r)
+            #Push elem into second stack, since Write 2 was utilized
+            push_stack(second_stack,superscript,elem)
           #If there are no other succeeding elements with the same superscript
           else:
             #Make Scan state
-            s = make_step(curr_state+1,s,None,None)
-            program.append(s)
+            sc = make_step(curr_state+1,s,None,None)
+            program.append(sc)
             curr_state+=1
             #Read 1 state goes to Scan state
-            r.add_transition(first_stack.symbol,s)
+            r.add_transition(first_stack.symbol,sc)
             #Scan state goes to Read 1 state
-            s.add_transition(elem,r)
+            sc.add_transition(elem,r)
           pop_stack(first_stack)
 
       elif(not second_stack.is_empty):
-         if(second_stack.superscript == superscript):
- 
-  
-    else: #If the element is the first
-      if(len(input_alphabet) > 1):
-        if(find_same_superscript(input_alphabet,superscript,i+1,1)):
-          push_stack(first_stack,superscript,elem)
-          program.append(make_step(curr_state,s,elem,State(curr_state+1,w1)))
-          curr_state+=1
-          program.append(make_step(curr_state,w1,elem, State(curr_state-1,s)))
-      else:
-        program.append(make_step(curr_state,s,elem,State(curr_state,s)))
-      
+        #print('second stack is not empty')
+        #If the superscript of the element pushed into the stack is the same as the current superscript
+        if(second_stack.superscript == superscript):
+          #Make Read 2 state
+          r = make_step(curr_state, r2,None,None)
+          program.append(r)
+          #Latest scan state goes to Read 1 state
+          latest_scan_state.add_transition(elem,r)
+          #If there are other succeeding elements ahead with the same superscript in input alphabet,
+          if(find_same_superscript(input_alphabet,superscript,i+1,1)):
+            #Make Write 1 state
+            w = make_step(curr_state+1,w1,None,None)
+            program.append(w)
+            curr_state+=1
+            #Read 2 state goes to Write 1 state
+            r.add_transition(second_stack.symbol,w)
+            #Make Scan state
+            sc = make_step(curr_state+1,s,None,None)
+            program.append(sc)
+            curr_state+=1
+            #Write 1 state goes to new Scan state
+            w.add_transition(elem,sc)
+            #Scan state goes back to Read 2 state
+            sc.add_transition(elem,r)
+          #If there are no other succeeding elements with the same superscript
+          else:
+            #Make Scan state
+            sc = make_step(curr_state+1,s,None,None)
+            program.append(sc)
+            curr_state+=1
+            #Read 2 state goes to Scan state
+            r.add_transition(second_stack.symbol,sc)
+            #Scan state goes to Read 2 state
+            sc.add_transition(elem,r)
+          pop_stack(second_stack)
 
-    '''
-
-    #Add scan states depending on the number of the element's superscript (i.e. k >= 1)
-    for j in range(0,superscript_amt):
-      program.append(make_step(curr_state,s,elem,State(curr_state+1,s)))
-      curr_state +=1
-
-    if(i > 0): #If the element is not the first
-      
-      #Check if first stack empty
-      if(not first_stack.is_empty):
-        #If the superscript of the elem in the first stack match with the curr elem
-        if(first_stack.superscript == superscript):
-          
-          #Make scan symbol
-          program.append(make_step(lss_num, s, elem, State(curr_state+1,r1)))
-          curr_state+=1
-          #Make read 1 prev symbol
-          program.append(make_step(curr_state, r1,first_stack.symbol,State(curr_state+1,w2)))
-          curr_state+=1
-          #Make write 2 symbol
-          #Check if there is elements with the same superscript. if ther is, then make the write2 step
-          program.append(make_step(curr_state, w2,elem,State(lss_num,s)))
-          curr_state+=1
-          #Pop from stack
-          pop_stack(first_stack)
-
-      #else check if second stack empty
-      elif(not second_stack.is_empty):
-        #If the superscript of the elem in the second stack match with the curr elem?
-        if(first_stack.superscript == superscript):
-          print("hackdog")
-          #Pop from stack
-          #Make scan symbol
-          #Make read 1 prev symbol
-          #Make write 2 symbol 
-
-      else:
-        print("1W2S is not doable!")
-
-    else: #If the element is the first
-      if(first_stack.is_empty):
-        push_stack(first_stack,superscript,elem)
-        program.append(make_step(lss_num,s,elem,State(curr_state+1,w1)))
-        curr_state+=1
-        program.append(make_step(curr_state,w1,elem, State(lss_num,s)))
-    '''
-  
   #Retrieve latest scan state and add a transition going to the halt state
   latest_scan_state = get_latest_scan_state(program)
   latest_scan_state.add_transition('#', State(curr_state+1, s))
