@@ -3,7 +3,7 @@ import one_way_two_stack as owts
 
 #input = "L={ak bm dk|k>=1,m>2}"
 #input = "L={ak bk ck bk|k>=1}"
-input = "L={ak bk ck|k>=1}"
+input = "L={an bm cn|n>=1,m>=1}"
 
 input = input[3:-1]
 
