@@ -1,4 +1,5 @@
 import re
+import MP2
 
 s = "scan"
 w1 = "write 1"
