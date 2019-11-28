@@ -1,3 +1,14 @@
+
+input_alphabet_global = []
+
+def set_input_alphabet_global(input_alphabet):
+	global input_alphabet_global
+	input_alphabet_global = input_alphabet
+
+def get_input_alphabet_global():
+	return input_alphabet_global
+
+
 def onewayonestack(input):
 	
 	result = []
@@ -22,7 +33,9 @@ def onewayonestack(input):
 			if len(element) == 1:
 				inputdict = {"superscript":"1", "element":element[0], "place":place} #one character
 				input_alphabet.append(inputdict)
-	
+
+		set_input_alphabet_global(input_alphabet)
+
 		elemcount = 0
 		for elem in input_alphabet:
 			if elem["superscript"] != "1":
